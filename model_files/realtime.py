@@ -6,6 +6,11 @@ import ArcFace
 import firebase_admin
 from firebase_admin import credentials, messaging
 import time
+import boto3
+from PIL import Image
+from io import BytesIO
+
+
 
 # Firebase 초기화
 cred = credentials.Certificate("C:\\Users\\HanGyeol.Kim\\Desktop\\asd\\bits-drive-bcab9-firebase-adminsdk-ibjho-5235e7f2f6.json")
@@ -16,11 +21,22 @@ model = ArcFace.loadModel()
 model.load_weights("arcface_weights.h5")
 
 target_size = (112, 112)
-img2_path = "C:\\Users\\HanGyeol.Kim\\Desktop\\asd\\fa\\hg1.jpg"
+# img2_path = "C:\\Users\\HanGyeol.Kim\\Desktop\\asd\\fa\\hg1.jpg"
 detector_backend = 'retinaface'
 
 # 기준 이미지 로딩
-img2 = functions.extract_faces(img2_path, target_size=target_size, detector_backend=detector_backend)
+# img2 = functions.extract_faces(img2_path, target_size=target_size, detector_backend=detector_backend)
+s3_client = boto3.client('s3')
+bucket_name= 's3-event-20231028'
+objects = s3_client.list_objects_v2(Bucket= bucket_name)
+sorted_objects = sorted(objects.get('Contents', []), key=lambda x: x['LastModified'], reverse=True)
+recent_file_key = sorted_objects[0]['Key']
+response = s3_client.get_object(Bucket=bucket_name, Key=recent_file_key)
+recent_file_content = response['Body'].read()
+img2 = functions.extract_faces(BytesIO(recent_file_content), target_size=target_size, detector_backend=detector_backend)
+#테스트용 저장
+image_to_save = Image.fromarray((img2[0][0] * 255).astype(np.uint8))
+image_to_save.save("saved_img2.jpg")
 
 metric = 'cosine'
 
