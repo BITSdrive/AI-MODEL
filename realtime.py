@@ -1,0 +1,147 @@
+from deepface import DeepFace
+from commons import functions, distance as dst
+import cv2
+import numpy as np
+import ArcFace
+import firebase_admin
+from firebase_admin import credentials, messaging, initialize_app
+import time
+import boto3
+from PIL import Image
+from io import BytesIO
+
+
+
+# Firebase 초기화
+cred = credentials.Certificate("C:\\Users\\HanGyeol.Kim\\Desktop\\asd\\bits-drive-bcab9-firebase-adminsdk-ibjho-5235e7f2f6.json")
+firebase_admin.initialize_app(cred)
+
+# 모델 로딩
+model = ArcFace.loadModel()
+model.load_weights("arcface_weights.h5")
+
+target_size = (112, 112)
+# img2_path = "C:\\Users\\HanGyeol.Kim\\Desktop\\asd\\fa\\hg1.jpg"
+detector_backend = 'retinaface'
+
+# 기준 이미지 로딩
+# img2 = functions.extract_faces(img2_path, target_size=target_size, detector_backend=detector_backend)
+s3_client = boto3.client('s3')
+bucket_name= 's3-event-20231028'
+objects = s3_client.list_objects_v2(Bucket= bucket_name)
+sorted_objects = sorted(objects.get('Contents', []), key=lambda x: x['LastModified'], reverse=True)
+recent_file_key = sorted_objects[0]['Key']
+response = s3_client.get_object(Bucket=bucket_name, Key=recent_file_key)
+recent_file_content = response['Body'].read()
+with open("temp_image.jpg", "wb") as temp_file:
+    temp_file.write(recent_file_content)
+img2 = functions.extract_faces("temp_image.jpg", target_size=target_size, detector_backend=detector_backend)
+
+#테스트용 저장
+image_to_save = Image.fromarray((img2[0][0][0] * 255).astype(np.uint8))
+image_to_save.save("saved_img2.jpg")
+
+metric = 'cosine'
+
+
+def findThreshold(metric):
+    if metric == 'cosine':
+        return 0.6871912959056619
+    elif metric == 'euclidean':
+        return 4.1591468986978075
+    elif metric == 'euclidean_l2':
+        return 1.1315718048269017
+
+
+def send_notification_to_android():
+    try:
+        # Firebase를 사용하여 Android 앱에 푸시 알림을 전송
+        message = messaging.Message(
+            notification=messaging.Notification(
+                title='Alert',
+                body='Different person detected multiple times!'
+            ),
+            topic='BITSdrive'
+        )
+
+        # 알림 전송
+        response = messaging.send(message)
+
+        # 응답 메시지 ID 출력
+        print(f"Successfully sent message: {response}")
+
+    except Exception as e:
+        # 오류 메시지 출력
+        print(f"Failed to send the message: {e}")
+
+
+def verify(img1, img2):
+    img1_array = np.array([face_img for face_img, _, _ in img1])
+    img2_array = np.array([face_img for face_img, _, _ in img2])
+
+    # 얼굴이 감지되지 않았을 경우 카운트 및 경고를 하지 않음
+    if len(img1_array) == 0 or len(img2_array) == 0:
+        print("3")
+        return
+
+    img1_array = np.squeeze(img1_array, axis=1)
+    img2_array = np.squeeze(img2_array, axis=1)
+    img1_embedding = model.predict(img1_array)[0]
+    img2_embedding = model.predict(img2_array)[0]
+
+    if metric == 'cosine':
+        distance = dst.findCosineDistance(img1_embedding, img2_embedding)
+    elif metric == 'euclidean':
+        distance = dst.findEuclideanDistance(img1_embedding, img2_embedding)
+    elif metric == 'euclidean_l2':
+        distance = dst.findEuclideanDistance(dst.l2_normalize(img1_embedding), dst.l2_normalize(img2_embedding))
+
+    threshold = findThreshold(metric)
+    if distance > threshold:
+        print("0")
+        return "different"
+    else:
+        print("1")
+        return "same"
+
+
+
+def save_notification_to_local():
+    alert_message = 'Different person detected multiple times!'
+    with open('alert_message.txt', 'w') as txt_file:
+        txt_file.write(alert_message)
+
+# 웹캠 초기화
+cap = cv2.VideoCapture(0)
+diff_count = 0  # 다른 사람으로 판별된 횟수를 저장하는 변수
+
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        print("Failed to grab frame")
+        break
+
+    try:
+        # 임시 파일 저장 및 로드 없이 직접 프레임에서 얼굴 추출
+        img1 = functions.extract_faces(frame, target_size=target_size, detector_backend=detector_backend)
+
+        # img1에서 얼굴이 감지되면 verify를 수행
+        if img1:
+            result = verify(img1, img2)
+            if result == "different":
+                diff_count += 1
+            elif result == "same":  # 여기에 해당 로직을 추가합니다.
+                diff_count = 0
+
+    except ValueError:
+        pass  # 얼굴 감지 실패시 경고메시지 무시하고 계속 실행
+
+    if diff_count >= 1:
+        send_notification_to_android()
+        save_notification_to_local()
+        diff_count = 0
+
+    time.sleep(5)
+
+cap.release()
+cv2.destroyAllWindows()
