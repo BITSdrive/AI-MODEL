@@ -45,9 +45,9 @@ Korean face는 총 1300명의 라벨과 각 인물당 50장의 이미지를 사�
 유의할 점으로 데이터는 AI Hub의 사전 허가를 통해 제공받을 수 있으며 허가 받지 않은 사용자에게 데이터를 배포를 금하고 있습니다.
 
 
-<div style="text-align:center">
+<p align="center">
 <img width="300" alt="image" src="https://github.com/BITSdrive/AI-MODEL/assets/126750984/a71ce01d-73dd-4b5b-bb3a-60de17b8412f">
-</div>
+</p>
 
 <br/>
 
@@ -58,6 +58,12 @@ Korean face는 총 1300명의 라벨과 각 인물당 50장의 이미지를 사�
 <br/>
 
 ##  Training and Testing
+
+<p align="center">
+<img width="300" alt="image" src="https://github.com/BITSdrive/AI-MODEL/assets/126750984/edf8490a-baca-43de-8c01-826f7008aa39">
+</p>
+<br/>
+
 - TF프레임 워크에서 대용량의 이미지로 모델을 훈련하기 위해서는 TFrecorder로 이미지 데이터를 직렬화 하는 방식으로 진행하였습니다
 TFrecord는 tensorflow에서 사용되는 데이터 형식으로, 대용량의 데이터셋을 다룰 때 사용됩니다
 이는 원본 데이터를 직렬화하여 이진 바이너리 파일형태로 저장하기에 Tensorflow의 입출력 작업에 최적화 되어 있어 데이터 로딩시간을 줄여줍니다
@@ -81,3 +87,24 @@ epochs: 20, &nbsp;
 base_lr: 0.01, &nbsp;
 w_decay: !!float 5e-4, &nbsp;
 save_steps: 1000 &nbsp;
+
+
+- Fine-tuning
+> MS-Celeb-1M데이터를 사용하여 얻은 가중치를 사용하여 한국인 얼굴 이미지로 파인 튜닝 
+>config
+batch_size: 512 , &nbsp;
+input_size: 112, &nbsp;
+embd_shape: 512, &nbsp;
+sub_name: 'arc_res50', &nbsp;
+backbone_type: 'ResNet50, &nbsp;
+head_type: ArcHead 
+
+- train
+> train_dataset: './data/Koreanfaceparsing.tfrecord'
+binary_img: True
+num_classes: 1300
+num_samples: 65000
+epochs: 2000
+base_lr: 0.001
+w_decay: !!float 5e-4
+save_steps: 1000
