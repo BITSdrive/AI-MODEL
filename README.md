@@ -64,7 +64,8 @@ Korean face는 총 1300명의 라벨과 각 인물당 50장의 이미지를 사�
 </p>
 <br/>
 
-- TF프레임 워크에서 대용량의 이미지로 모델을 훈련하기 위해서는 TFrecorder로 이미지 데이터를 직렬화 하는 방식으로 진행하였습니다
+- **TFRecord**
+> TF프레임 워크에서 대용량의 이미지로 모델을 훈련하기 위해서는 TFrecorder로 이미지 데이터를 직렬화 하는 방식으로 진행하였습니다
 TFrecord는 tensorflow에서 사용되는 데이터 형식으로, 대용량의 데이터셋을 다룰 때 사용됩니다
 이는 원본 데이터를 직렬화하여 이진 바이너리 파일형태로 저장하기에 Tensorflow의 입출력 작업에 최적화 되어 있어 데이터 로딩시간을 줄여줍니다
 face verification을 위한 모델의 학습에는 대용량의 이미지 데이터가 필요하기에 Tensorflow 환경에서 효과적으로 학습하기 위해서 tf-record를 사용하였습니다
@@ -83,7 +84,8 @@ input_size: 112 &nbsp;
 embd_shape: 512, &nbsp;
 backbone_type: 'ResNet50', &nbsp;
 head_type: ArcHead,, &nbsp;
-train_dataset: './data/ms1m_bin.tfrecord', &nbsp;
+
+> train : train_dataset: './data/ms1m_bin.tfrecord', &nbsp;
 binary_img: True , &nbsp;
 num_classes: 85742 , &nbsp;
 num_samples: 5822653, &nbsp;
@@ -91,7 +93,6 @@ epochs: 20, &nbsp;
 base_lr: 0.01, &nbsp;
 w_decay: !!float 5e-4, &nbsp;
 save_steps: 1000 &nbsp;
-
 
 <br/>
 <br/>
@@ -103,15 +104,15 @@ save_steps: 1000 &nbsp;
 
 - K-Face
 > MS-Celeb-1M데이터를 사용하여 얻은 가중치를 사용하여 한국인 얼굴 이미지로 파인 튜닝 
->config
+
+- KoreanFace
+> config
 batch_size: 512 , &nbsp;
 input_size: 112, &nbsp;
 embd_shape: 512, &nbsp;
 sub_name: 'arc_res50', &nbsp;
 backbone_type: 'ResNet50, &nbsp;
 head_type: ArcHead 
-
-<br/>
 
 - train
 > train_dataset: './data/Koreanfaceparsing.tfrecord'
@@ -123,15 +124,12 @@ base_lr: 0.001
 w_decay: !!float 5e-4
 save_steps: 1000
 
-
 <br/>
 <br/>
 <br/>
-
 
 ## **Fine-Tuning**
 <img src="https://github.com/BITSdrive/AI-MODEL/assets/126750984/921df2b6-5029-4b85-9da1-430721e44e24" alt="훈련 출력" width = "350"/> <img src="https://github.com/BITSdrive/AI-MODEL/assets/126750984/ad3dd83b-4bf5-4234-88c4-83a8be420297" alt="훈련 출력" width = "360"/>
-
 
 <br/>
 <br/>
@@ -146,12 +144,12 @@ save_steps: 1000
 
 - FNIR (False Acceptance Rate)
 > 실제로는 다른 사람인 경우 중, 알고리즘이 같은 사람이라고 판단한 비율
-
+> 
 <br/>
 
 - 특성곡선 (Receiver Operating Characteristic curve)
 > 임계값을 0에서 1까지 변화시키며 각각의 임계값마다 (FAR, FRR) 혹은 (FPIR, FNIR)을 계산해 2차원 좌표에 점들을 찍어 그린 곡선
-
+> 
 <br/>
 
 - AUC (Area Under Curve)
@@ -165,17 +163,14 @@ AUC는 여러 임계값 마다 측정된 오류율을 종합적인 값으로 산
 <img width="600" alt="image" src="https://github.com/BITSdrive/AI-MODEL/assets/126750984/e96cb13b-acf3-426e-be80-266fccbb16d9">
 </p>
 
-
 <br/>
+
 <br/>
 <br/>
 
 ## Test Result
-
 - **FPIR , FNIR 곡선**
   
-
 | <img src="https://github.com/BITSdrive/AI-MODEL/assets/126750984/10ee8a3f-b1fc-4652-8f77-1ce4c5acae8c" alt="curve" width = "500"/> | <img src="https://github.com/BITSdrive/AI-MODEL/assets/126750984/69eb35d3-2932-4523-87d3-9033135c0e1f" alt="curve" width = "500"/>  | 
 | :---: | :---: | 
 |[MS-Celeb-1M] | [K-face fine-tuning]|
-
