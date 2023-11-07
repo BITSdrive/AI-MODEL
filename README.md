@@ -108,3 +108,24 @@ epochs: 2000
 base_lr: 0.001
 w_decay: !!float 5e-4
 save_steps: 1000
+
+- 
+
+## Test 지표
+- FPIR (False Rejection Rate)
+> 실제로는 같은 사람인 경우 중, 알고리즘이 다른 사람이라고 판단한 비율
+거짓 수락율
+
+- FNIR (False Acceptance Rate)
+> 실제로는 다른 사람인 경우 중, 알고리즘이 같은 사람이라고 판단한 비율
+
+- 특성곡선 (Receiver Operating Characteristic curve)
+> 임계값을 0에서 1까지 변화시키며 각각의 임계값마다 (FAR, FRR) 혹은 (FPIR, FNIR)을 계산해 2차원 좌표에 점들을 찍어 그린 곡선
+
+- AUC (Area Under Curve)
+> 특성 곡선의 아래 면적을 의미하며,
+AUC는 여러 임계값 마다 측정된 오류율을 종합적인 값으로 산출
+※ 0에 가까울수록 오류율이 낮다고 해석
+
+
+## Test Result
