@@ -73,6 +73,10 @@ face verification을 위한 모델의 학습에는 대용량의 이미지 데이
 <br/>
 
 ## Hyperparameter
+<p align="center">
+<img width="300" alt="image" src="https://github.com/BITSdrive/AI-MODEL/assets/126750984/d9616b48-aa79-4601-af18-40ce4e40c68a">
+</p>
+
 - MS-Celeb-1M config &nbsp;
 >batch_size: 256 &nbsp;
 input_size: 112 &nbsp;
@@ -89,7 +93,15 @@ w_decay: !!float 5e-4, &nbsp;
 save_steps: 1000 &nbsp;
 
 
-- Fine-tuning
+<br/>
+<br/>
+<br/>
+
+<p align="center">
+<img width="200" alt="image" src="https://github.com/BITSdrive/AI-MODEL/assets/126750984/c07f4f1d-1e11-4d4f-9312-f357d1e9d884"> &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img width="200" alt="image" src="https://github.com/BITSdrive/AI-MODEL/assets/126750984/46dd4e66-73e2-4b89-a2e5-db313e3a3e6e"> 
+</p>
+
+- K-Face
 > MS-Celeb-1M데이터를 사용하여 얻은 가중치를 사용하여 한국인 얼굴 이미지로 파인 튜닝 
 >config
 batch_size: 512 , &nbsp;
@@ -98,6 +110,8 @@ embd_shape: 512, &nbsp;
 sub_name: 'arc_res50', &nbsp;
 backbone_type: 'ResNet50, &nbsp;
 head_type: ArcHead 
+
+<br/>
 
 - train
 > train_dataset: './data/Koreanfaceparsing.tfrecord'
@@ -109,23 +123,59 @@ base_lr: 0.001
 w_decay: !!float 5e-4
 save_steps: 1000
 
-- 
+
+<br/>
+<br/>
+<br/>
+
+
+## **Fine-Tuning**
+<img src="https://github.com/BITSdrive/AI-MODEL/assets/126750984/921df2b6-5029-4b85-9da1-430721e44e24" alt="훈련 출력" width = "350"/> <img src="https://github.com/BITSdrive/AI-MODEL/assets/126750984/ad3dd83b-4bf5-4234-88c4-83a8be420297" alt="훈련 출력" width = "360"/>
+
+
+<br/>
+<br/>
+<br/>
 
 ## Test 지표
 - FPIR (False Rejection Rate)
 > 실제로는 같은 사람인 경우 중, 알고리즘이 다른 사람이라고 판단한 비율
 거짓 수락율
 
+<br/>
+
 - FNIR (False Acceptance Rate)
 > 실제로는 다른 사람인 경우 중, 알고리즘이 같은 사람이라고 판단한 비율
 
+<br/>
+
 - 특성곡선 (Receiver Operating Characteristic curve)
 > 임계값을 0에서 1까지 변화시키며 각각의 임계값마다 (FAR, FRR) 혹은 (FPIR, FNIR)을 계산해 2차원 좌표에 점들을 찍어 그린 곡선
+
+<br/>
 
 - AUC (Area Under Curve)
 > 특성 곡선의 아래 면적을 의미하며,
 AUC는 여러 임계값 마다 측정된 오류율을 종합적인 값으로 산출
 ※ 0에 가까울수록 오류율이 낮다고 해석
 
+<br/>
+
+<p align="center">
+<img width="600" alt="image" src="https://github.com/BITSdrive/AI-MODEL/assets/126750984/e96cb13b-acf3-426e-be80-266fccbb16d9">
+</p>
+
+
+<br/>
+<br/>
+<br/>
 
 ## Test Result
+
+- **FPIR , FNIR 곡선**
+  
+
+| <img src="https://github.com/BITSdrive/AI-MODEL/assets/126750984/10ee8a3f-b1fc-4652-8f77-1ce4c5acae8c" alt="curve" width = "500"/> | <img src="https://github.com/BITSdrive/AI-MODEL/assets/126750984/69eb35d3-2932-4523-87d3-9033135c0e1f" alt="curve" width = "500"/>  | 
+| :---: | :---: | 
+|[MS-Celeb-1M] | [K-face fine-tuning]|
+
